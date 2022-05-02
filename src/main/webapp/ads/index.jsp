@@ -16,6 +16,11 @@
         <div class="col-md-6">
             <h2>${ad.title}</h2>
             <p>${ad.description}</p>
+            <form method="POST" action="/wish-list">
+                <input type="hidden" name="title" value="${ad.title}">
+                <input type="hidden" name="title" value="${ad.description}">
+                <button>Add to wishlist</button>
+            </form>
         </div>
     </c:forEach>
 </div>
