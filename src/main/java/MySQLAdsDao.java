@@ -13,7 +13,7 @@ public class MySQLAdsDao implements Ads {
             // Create the Connection object
             connection = DriverManager.getConnection(
                     config.getUrl(),
-                    //config.getUser(),
+                    config.getUser(),
                     config.getPassword()
             );
 
@@ -29,22 +29,37 @@ public class MySQLAdsDao implements Ads {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("SELECT FROM ads");
             while (rs.next()) {
-            Ad ad = new Ad(
-                    rs.getLong("id"),
-                    rs.getLong("user_id"),
-                    rs.getString("title"),
-                    rs.getString("description")
-            );
-            ads.add(ad);
-        }
-    } catch(SQLException sqle) {
+                Ad ad = new Ad(
+                        rs.getLong("id"),
+                        rs.getLong("user_id"),
+                        rs.getString("title"),
+                        rs.getString("description")
+                );
+                ads.add(ad);
+            }
+        } catch (SQLException sqle) {
             throw new RuntimeException("error connecting to db", sqle);
+        }
+        return ads;
     }
-    return ads;
-}
 
     @Override
     public Long insert(Ad ad) {
-        return null;
+        try {
+//            String insertQuery = "INSERT INTO adlister_db.ads (user_id, title, description) VALUES (" + ad.getUserId() + ",'" + ad.getTitle() + "', '" + ad.getDescription() + "')";
+            String insertQuery = "INSERT INTO adlister_db.ads (user_id, title, description) VALUES (?,?,?)";
+            PreparedStatement stmt = connection.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS);
+            stmt.setLong(1, ad.getUserId());
+            stmt.setString(2, ad.getTitle());
+            stmt.setString(3, ad.getDescription());
+            stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            rs.next();
+            return rs.getLong(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error creating a new ad.", e);
+        }
     }
 }
+
+
